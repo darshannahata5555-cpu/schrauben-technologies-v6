@@ -57,3 +57,29 @@
   .hero-image{inset:0;transform:none!important}
   .image-transition-layer{display:none!important}
 }
+
+/* Heading choreography retains the original text flow and explicit line breaks. */
+.type-ready .hero h1>span{animation:none}
+.motion-word-clip{display:inline-block;overflow:clip;vertical-align:bottom;padding:.08em 0 .13em;margin:-.08em 0 -.13em}
+.motion-word{display:inline-block;transform:translateY(112%);transition:transform 850ms var(--ease);transition-delay:var(--word-delay,0ms)}
+.word-heading.in-view .motion-word{transform:translateY(0)}
+.draw-rule{position:relative}
+.draw-rule:before{content:'';position:absolute;left:0;right:0;top:-1px;height:1px;background:#709077;transform:scaleX(0);transform-origin:left;transition:transform 1.1s var(--ease);transition-delay:var(--reveal-delay,0ms);pointer-events:none}
+.draw-rule.in-view:before,.in-view>.draw-rule:before{transform:scaleX(1)}
+.product-photo>img{translate:var(--product-x,0px) var(--product-y,0px);transition:transform .9s var(--ease),translate .25s var(--ease)}
+.button:before{content:'';position:absolute;inset:0;background:currentColor;opacity:.05;transform:translateX(-102%);transition:transform .5s var(--ease);pointer-events:none}
+.button:hover:before,.button:focus-visible:before{transform:translateX(0)}
+@view-transition{navigation:auto}
+.site-header{view-transition-name:site-header}
+::view-transition-old(root){animation:page-soft-out 180ms ease both}
+::view-transition-new(root){animation:page-soft-in 420ms var(--ease) both}
+::view-transition-group(site-header){animation-duration:340ms;animation-timing-function:ease}
+@keyframes page-soft-out{to{opacity:0}}
+@keyframes page-soft-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+  .motion-word{transform:none!important}
+  .draw-rule:before{transform:none}
+  .product-photo>img{translate:none!important}
+  @view-transition{navigation:none}
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
+}

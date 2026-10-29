@@ -14,7 +14,8 @@ shutil.copytree(root/'site',output)
 if base:
  for f in output.rglob('*'):
   if f.suffix in {'.html','.css','.js'}:
-   f.write_text(re.sub(r'''(?<=["'`(])/(?!/)''',lambda m:base+'/',f.read_text()))
+   pattern = r'''(?<=["'`(])/(?!/)''' if f.suffix == '.css' else r'''(?<=["'`])/(?!/)'''
+   f.write_text(re.sub(pattern,lambda m:base+'/',f.read_text()))
 (output/'.nojekyll').touch()
 # A real 404 keeps unknown URLs useful without hiding missing routes behind a homepage.
 notfound='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found | Schrauben Technologies</title><link rel="stylesheet" href="BASE/styles.css"></head><body><main class="detail-hero"><div class="section-label">SCHRAUBEN TECHNOLOGIES / 404</div><h1>Let’s get you<br>back on track.</h1><p>This page could not be found.</p><p><a class="button button-dark" href="BASE/">Return to the website <span>↗</span></a></p></main></body></html>'''

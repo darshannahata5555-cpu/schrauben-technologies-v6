@@ -176,6 +176,36 @@ const industries=[['Automotive','i-automotive','Automotive production assembly l
 const tabs=document.querySelector('#industry-tabs');if(tabs){tabs.innerHTML=industries.map((s,i)=>`<button role="tab" id="industry-tab-${i}" aria-controls="industry-panel" aria-selected="${i===0}" tabindex="${i===0?0:-1}"><span>${String(i+1).padStart(2,'0')}</span>${s[0]}<span aria-hidden="true">↗</span></button>`).join('');const buttons=[...tabs.querySelectorAll('button')];const panel=document.querySelector('#industry-panel');panel.setAttribute('aria-labelledby','industry-tab-0');function selectIndustry(i){buttons.forEach((b,j)=>{b.setAttribute('aria-selected',String(i===j));b.tabIndex=i===j?0:-1});const s=industries[i];transitionImage(document.querySelector('#industry-image'),`/schrauben-technologies-v6/assets/img/${s[1]}.webp`,s[2]);document.querySelector('#industry-title').textContent=s[0];document.querySelector('#industry-number').textContent=`${String(i+1).padStart(2,'0')} / 06`;const link=document.querySelector('#industry-link');link.href=`/schrauben-technologies-v6/industries/#${s[1]}`;link.setAttribute('aria-label',`Explore ${s[0]} applications`);panel.setAttribute('aria-labelledby',`industry-tab-${i}`)}buttons.forEach((b,i)=>{b.addEventListener('click',()=>selectIndustry(i));b.addEventListener('keydown',e=>{let next;if(['ArrowDown','ArrowRight'].includes(e.key))next=(i+1)%buttons.length;if(['ArrowUp','ArrowLeft'].includes(e.key))next=(i-1+buttons.length)%buttons.length;if(e.key==='Home')next=0;if(e.key==='End')next=buttons.length-1;if(next!==undefined){e.preventDefault();selectIndustry(next);buttons[next].focus()}})})}
 const menuToggle=document.querySelector('.menu-toggle');const mobileMenu=document.querySelector('#mobile-menu');function closeMobile(){menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open menu');showPanel(mobileMenu,false);document.body.classList.remove('menu-open')}menuToggle?.addEventListener('click',()=>{const open=menuToggle.getAttribute('aria-expanded')!=='true';if(!open){closeMobile();return}menuToggle.setAttribute('aria-expanded','true');menuToggle.setAttribute('aria-label','Close menu');showPanel(mobileMenu,true);document.body.classList.add('menu-open')});mobileMenu?.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMobile));const catalogToggle=document.querySelector('.catalog-toggle');const megaMenu=document.querySelector('#mega-menu');function closeMega(){if(catalogToggle)catalogToggle.setAttribute('aria-expanded','false');if(megaMenu&&!megaMenu.hidden)showPanel(megaMenu,false)}catalogToggle?.addEventListener('click',()=>{const open=catalogToggle.getAttribute('aria-expanded')!=='true';catalogToggle.setAttribute('aria-expanded',String(open));showPanel(megaMenu,open)});document.addEventListener('click',e=>{if(!e.target.closest('.nav-products'))closeMega()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(menuToggle.getAttribute('aria-expanded')==='true'){closeMobile();menuToggle.focus()}if(catalogToggle.getAttribute('aria-expanded')==='true'){closeMega();catalogToggle.focus()}}if(e.key==='Tab'&&menuToggle.getAttribute('aria-expanded')==='true'){const focusable=[menuToggle,...mobileMenu.querySelectorAll('a')];if(e.shiftKey&&document.activeElement===focusable[0]){e.preventDefault();focusable.at(-1).focus()}else if(!e.shiftKey&&document.activeElement===focusable.at(-1)){e.preventDefault();focusable[0].focus()}}});window.matchMedia('(min-width: 761px)').addEventListener('change',e=>{if(e.matches)closeMobile();else closeMega()});
 document.querySelector('#enquiry-form')?.addEventListener('submit',e=>{e.preventDefault();const d=new FormData(e.target);const body=`Name: ${d.get('name')}\nEmail: ${d.get('email')}\n\n${d.get('message')}`;window.location.href=`mailto:enquiry@schraubentechnologies.com?subject=${encodeURIComponent(d.get('subject')+' — '+d.get('name'))}&body=${encodeURIComponent(body)}`;document.querySelector('#form-status').textContent='Your enquiry is ready in your email app. If it did not open, email enquiry@schraubentechnologies.com directly.'});
+// Reveal words without changing the heading's text, line breaks or accessibility tree.
+if (!reduced.matches) {
+  document.body.classList.add('type-ready');
+  document.querySelectorAll('.hero h1,.detail-hero h1,.section-heading h2,.statement,.contact-heading h2').forEach(heading => {
+    if (heading.classList.contains('word-heading')) return;
+    const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    let index = 0;
+    nodes.forEach(node => {
+      const fragment = document.createDocumentFragment();
+      node.textContent.split(/(\s+)/).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) { fragment.append(document.createTextNode(part)); return; }
+        const clip = document.createElement('span');
+        clip.className = 'motion-word-clip';
+        const word = document.createElement('span');
+        word.className = 'motion-word';
+        word.textContent = part;
+        word.style.setProperty('--word-delay', `${Math.min(index++ * 45, 360)}ms`);
+        clip.append(word);
+        fragment.append(clip);
+      });
+      node.replaceWith(fragment);
+    });
+    heading.classList.add('word-heading', 'reveal');
+  });
+}
+document.querySelectorAll('.company-facts>div,.timeline>div,.range-bottom,.catalog-note').forEach(el => el.classList.add('draw-rule'));
+
 // Extend the same reveal language to supporting pages and editorial groups.
 const revealSelectors = '.about-editorial>div:last-child,.history .section-heading,.timeline>div,.directors article,.about-cta h2,.detail-hero h1,.detail-hero>p,.detail-content>img,.detail-content>h2,.detail-aside,.career-row,.detail-industry-grid>a';
 document.querySelectorAll(revealSelectors).forEach(el => el.classList.add('reveal'));
@@ -218,3 +248,41 @@ function onScroll() { if (!scheduled) { scheduled = true; requestAnimationFrame(
 addEventListener('scroll', onScroll, { passive: true });
 addEventListener('resize', onScroll, { passive: true });
 updateScroll();
+
+// Only the product image responds to the pointer; links and layout stay stationary.
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+let activeProductPhoto = null;
+let productPointerFrame = 0;
+let pointerPosition = null;
+function resetProductPosition() {
+  cancelAnimationFrame(productPointerFrame);
+  productPointerFrame = 0;
+  if (activeProductPhoto) {
+    activeProductPhoto.style.setProperty('--product-x', '0px');
+    activeProductPhoto.style.setProperty('--product-y', '0px');
+    activeProductPhoto = null;
+  }
+}
+document.addEventListener('pointermove', event => {
+  if (reduced.matches || !finePointer.matches || event.pointerType === 'touch') return;
+  const photo = event.target.closest('.product-photo');
+  if (photo !== activeProductPhoto) { resetProductPosition(); activeProductPhoto = photo; }
+  if (!photo) return;
+  pointerPosition = { x: event.clientX, y: event.clientY };
+  if (productPointerFrame) return;
+  productPointerFrame = requestAnimationFrame(() => {
+    productPointerFrame = 0;
+    if (!activeProductPhoto || !activeProductPhoto.isConnected) return;
+    const bounds = activeProductPhoto.getBoundingClientRect();
+    const x = Math.max(-5, Math.min(5, ((pointerPosition.x - bounds.left) / bounds.width - .5) * 10));
+    const y = Math.max(-5, Math.min(5, ((pointerPosition.y - bounds.top) / bounds.height - .5) * 10));
+    activeProductPhoto.style.setProperty('--product-x', `${x.toFixed(2)}px`);
+    activeProductPhoto.style.setProperty('--product-y', `${y.toFixed(2)}px`);
+  });
+}, { passive: true });
+document.addEventListener('pointerout', event => {
+  if (activeProductPhoto && (!event.relatedTarget || !activeProductPhoto.contains(event.relatedTarget))) resetProductPosition();
+}, { passive: true });
+addEventListener('blur', resetProductPosition);
+reduced.addEventListener('change', resetProductPosition);
+finePointer.addEventListener('change', resetProductPosition);
