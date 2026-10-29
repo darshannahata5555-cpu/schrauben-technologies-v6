@@ -4,10 +4,11 @@ import argparse,re,shutil
 root=Path(__file__).resolve().parent.parent
 parser=argparse.ArgumentParser()
 parser.add_argument('--base-path',default='',help='GitHub Pages base_path output, e.g. /schrauben-technologies-v6')
+parser.add_argument('--output',choices=['_site','docs'],default='_site',help='Build destination')
 args=parser.parse_args();base=args.base_path.strip().rstrip('/')
 if base and (not base.startswith('/') or base.startswith('//') or '..' in base.split('/') or any(c in base for c in '\\"\'`?#')):
  parser.error('base-path must be an absolute URL path without traversal, quotes, queries or fragments')
-output=root/'_site'
+output=root/args.output
 if output.exists():shutil.rmtree(output)
 shutil.copytree(root/'site',output)
 if base:

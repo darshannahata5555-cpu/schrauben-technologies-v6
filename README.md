@@ -2,11 +2,13 @@
 
 Professional, photography-led website for Schrauben Technologies. Includes a searchable product catalogue, company history and leadership, integrated services, material reference tables, quality policies and careers.
 
-## Edit
+## Website
 
-The website is buildless. Edit the HTML, CSS, JavaScript and assets directly in `site/`. `site/app.js` contains the product/service data and the interactive behaviour. Fonts are self-hosted; their Open Font Licenses are included with the assets.
+https://darshannahata5555-cpu.github.io/schrauben-technologies-v6/
 
-## Preview
+## Edit and preview
+
+Edit HTML, CSS, JavaScript and assets directly in `site/`. Product and service data and interactive behaviour live in `site/app.js`. Fonts are self-hosted, with their Open Font Licenses included.
 
 ```sh
 python3 -m http.server 4173 --directory site
@@ -14,19 +16,20 @@ python3 -m http.server 4173 --directory site
 
 Open http://localhost:4173.
 
-## GitHub Pages
+## Publish updates
 
-The `Deploy Schrauben v6 to GitHub Pages` workflow runs on every push to `main` and can also be started manually. It builds and validates the static files, uploads the Pages artifact and deploys it. Pages must use **GitHub Actions** as its publishing source.
-
-The build reads the configured Pages base path, so assets, page links and JavaScript-generated content work under a repository URL and with a custom domain.
-
-To reproduce a project deployment locally:
+GitHub Pages publishes the `docs/` directory from the `main` branch. After editing the source, regenerate the deployable website and push both source and output:
 
 ```sh
-python3 scripts/build-pages.py --base-path /schrauben-technologies-v6
+python3 scripts/build-pages.py --base-path /schrauben-technologies-v6 --output docs
+git add site docs
+git commit -m "Update website"
+git push origin main
 ```
 
-Production files are emitted to `_site/`. Generated output is ignored by Git.
+The build adjusts assets, page links and JavaScript-generated content for the repository URL and checks all static link targets. GitHub automatically deploys the updated `docs/` directory after the push.
+
+For a custom domain, rebuild with an empty `--base-path` instead. The optional custom Actions workflow is retained at `deployment/github-pages-actions.example.yml`; branch publishing does not require it.
 
 ## Enquiries
 
@@ -34,4 +37,4 @@ The enquiry form prepares a message in the visitor's email application. It does 
 
 ## Version
 
-Version **v6.0.0** preserves the approved green-and-white design, industrial photography, responsive layouts, restrained animation and all 31 content pages.
+**v6.0.0** preserves the approved green-and-white design, industrial photography, responsive layouts, restrained animation and all 31 content pages, plus a custom 404 page.
